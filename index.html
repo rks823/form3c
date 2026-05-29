@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form No. 3C — Daily Case Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f4f1eb;--surface:#fff;--surface2:#faf8f4;
+  --ink:#1c1917;--ink2:#57534e;--ink3:#a8a29e;
+  --border:#e2ddd6;--border2:#d4cdc3;
+  --accent:#9b1c1c;--accent2:#dc2626;--accent-bg:#fef2f2;
+  --gold:#b45309;--gold-bg:#fffbeb;--gold-border:#fde68a;
+  --green:#15803d;--green-bg:#f0fdf4;--green-border:#86efac;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-border:#93c5fd;
+  --shadow-sm:0 1px 3px rgba(28,25,23,.08);
+  --shadow-md:0 4px 16px rgba(28,25,23,.10);
+  --radius:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle at 20% 80%,rgba(155,28,28,.04) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(180,83,9,.04) 0%,transparent 50%);
+  min-height:100vh;color:var(--ink)}
+
+/* HEADER */
+.app-header{background:var(--ink);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:64px;border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md)}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-badge{background:var(--accent);color:#fff;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:4px 10px;border-radius:3px;letter-spacing:1px}
+.brand-title{font-family:'Libre Baskerville',serif;font-size:17px;color:#fff;letter-spacing:.3px}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.3px}
+.sync-indicator{font-size:11px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:6px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#6b7280;transition:background .3s}
+.sync-dot.active{background:#22c55e}.sync-dot.loading{background:#f59e0b;animation:pulse 1s infinite}.sync-dot.error{background:#ef4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TABS */
+.tabs-bar{background:var(--surface);border-bottom:2px solid var(--border);padding:0 32px;display:flex;overflow-x:auto;box-shadow:var(--shadow-sm)}
+.tab-btn{background:none;border:none;padding:0 24px;height:52px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;color:var(--ink2);cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .18s;white-space:nowrap}
+.tab-btn:hover{color:var(--ink);background:var(--surface2)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+
+/* PANELS */
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.panel-wrap{max-width:1000px;margin:0 auto;padding:32px 24px 80px}
+
+/* CARD */
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:28px 32px;box-shadow:var(--shadow-sm);margin-bottom:24px}
+.card-title{font-family:'Libre Baskerville',serif;font-size:15px;color:var(--ink);margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+
+/* FORM */
+.form-row{display:grid;gap:16px;margin-bottom:16px}
+.form-row.two{grid-template-columns:1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink2)}
+.col-ref{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.5px}
+.field input,.field select,.field textarea{border:1.5px solid var(--border2);border-radius:4px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface2);outline:none;transition:border-color .18s,box-shadow .18s,background .18s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(155,28,28,.07)}
+.rupee-wrap{position:relative}
+.rupee-wrap .sym{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ink2);pointer-events:none;font-weight:600}
+.rupee-wrap input{padding-left:22px}
+
+/* ENTRY FORM ROWS — desktop grid, collapse to 1-col on mobile */
+.row-entry-top{grid-template-columns:150px 110px 1fr 130px}
+.row-entry-mid{grid-template-columns:1fr 150px}
+.row-entry-bot{grid-template-columns:1fr 1fr 1fr}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border:none;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:all .18s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}.btn-primary:active{transform:scale(.98)}
+.btn-secondary{background:var(--surface);color:var(--ink);border:1.5px solid var(--border2)}.btn-secondary:hover{border-color:var(--ink2)}
+.btn-success{background:#166534;color:#fff}.btn-success:hover{background:var(--green)}
+.btn-danger{background:transparent;color:var(--accent);border:1.5px solid var(--accent);font-size:12px;padding:6px 12px}
+.btn-danger:hover{background:var(--accent-bg)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn.loading{opacity:.6;pointer-events:none}
+.btn-row{display:flex;gap:10px;align-items:center;margin-top:22px;flex-wrap:wrap}
+
+/* STATUS */
+.status{display:none;padding:11px 16px;border-radius:4px;font-size:13px;font-weight:500;align-items:center;gap:8px;margin-top:14px;animation:fadeUp .25s ease}
+.status.show{display:flex}
+.status.success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.status.error{background:var(--accent-bg);color:var(--accent);border:1px solid #fca5a5}
+.status.info{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.status.warning{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface2);padding:9px 14px;text-align:left;font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink2);border-bottom:2px solid var(--border);white-space:nowrap}
+thead th .ref{display:block;font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);font-weight:400;margin-bottom:1px}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+tbody tr:hover{background:#faf7f2}
+tbody tr:nth-child(even){background:var(--surface2)}
+tbody tr:nth-child(even):hover{background:#f0ece4}
+tbody td{padding:9px 14px;vertical-align:middle}
+td.mono{font-family:'DM Mono',monospace}
+td.accent-col{color:var(--accent);font-weight:700;font-family:'DM Mono',monospace}
+td.green-col{color:var(--green);font-weight:700;font-family:'DM Mono',monospace}
+.empty-row td{text-align:center;padding:48px;color:var(--ink3);font-style:italic}
+
+/* MONTH STATS */
+.month-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-box{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow-sm)}
+.stat-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:6px}
+.stat-val{font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700}
+.stat-val.green{color:var(--green)}.stat-val.accent{color:var(--accent)}
+
+/* FILTER ROW */
+.filter-row{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.filter-row input{flex:1;min-width:160px;border:1.5px solid var(--border2);border-radius:4px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--surface);transition:border-color .18s}
+.filter-row input:focus{border-color:var(--accent)}
+.total-display{font-family:'DM Mono',monospace;font-size:13px;color:var(--green);font-weight:500;background:var(--green-bg);border:1px solid var(--green-border);padding:7px 14px;border-radius:4px;white-space:nowrap}
+
+/* ═══ SERVICES DRAG-LIST ═══ */
+.svc-add-bar{display:flex;gap:10px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap}
+.svc-add-bar .field{flex:1;min-width:180px}
+
+.svc-list{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;min-height:60px}
+.svc-list-header{display:grid;grid-template-columns:32px 36px 1fr 160px 80px;background:var(--surface2);padding:8px 14px;border-bottom:2px solid var(--border)}
+.svc-list-header span{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3)}
+.svc-item{display:grid;grid-template-columns:32px 36px 1fr 160px 80px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface);transition:background .12s;cursor:grab;user-select:none}
+.svc-item:last-child{border-bottom:none}
+.svc-item:hover{background:#faf7f2}
+.svc-item.dragging{opacity:.45;background:#fffbeb}
+.svc-item.drag-over{border-top:2px solid var(--accent)}
+.drag-handle{color:var(--ink3);font-size:16px;cursor:grab;text-align:center;line-height:1}
+.drag-handle:active{cursor:grabbing}
+.svc-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);text-align:center}
+.svc-name{font-size:13.5px;font-weight:500;color:var(--ink)}
+.svc-dept{font-size:12px;color:var(--ink2)}
+.svc-actions{display:flex;gap:6px;justify-content:flex-end}
+.btn-del-svc{background:none;border:1px solid #fca5a5;color:var(--accent);border-radius:3px;padding:3px 8px;font-size:11px;cursor:pointer;transition:all .15s}
+.btn-del-svc:hover{background:var(--accent-bg)}
+.svc-empty{padding:32px;text-align:center;color:var(--ink3);font-style:italic;font-size:13px}
+
+/* CONFIG */
+.step-list{counter-reset:step}
+.step-item{counter-increment:step;display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;font-size:13.5px;color:var(--ink2);line-height:1.7}
+.step-item::before{content:counter(step);flex-shrink:0;width:26px;height:26px;background:var(--ink);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'DM Mono',monospace;margin-top:2px}
+pre.script-block{background:var(--ink);color:#d4d4d4;padding:20px 24px;border-radius:var(--radius);font-family:'DM Mono',monospace;font-size:12px;overflow-x:auto;line-height:1.7;margin:14px 0;border:1px solid #333;white-space:pre}
+pre .kw{color:#c792ea}pre .fn{color:#82aaff}pre .str{color:#c3e88d}pre .cm{color:#697098}
+.code-note{font-size:11.5px;color:var(--ink3);font-style:italic;margin-top:6px}
+
+/* FOOTER */
+.app-footer{text-align:center;padding:28px;font-size:11px;color:var(--ink3);border-top:1px solid var(--border);letter-spacing:.3px}
+
+/* ─── TABLET ─── */
+@media(max-width:768px){
+  .panel-wrap{padding:20px 14px 80px}
+  .month-stats{grid-template-columns:1fr 1fr}
+  .form-row.two{grid-template-columns:1fr}
+}
+
+/* ─── MOBILE ─── */
+@media(max-width:520px){
+  /* Header */
+  .app-header{padding:0 12px;height:52px}
+  .brand-badge{font-size:10px;padding:3px 7px}
+  .brand-title{font-size:14px}
+  .brand-sub{display:none}
+  .sync-indicator{font-size:10px}
+
+  /* Tabs — icon only on very small, scrollable */
+  .tabs-bar{padding:0 4px;gap:0}
+  .tab-btn{padding:0 10px;height:44px;font-size:11.5px;gap:5px}
+
+  /* Panels & Cards */
+  .panel-wrap{padding:14px 10px 80px}
+  .card{padding:16px 14px;margin-bottom:16px}
+  .card-title{font-size:14px;margin-bottom:16px}
+
+  /* Form fields — all single column on mobile */
+  .form-row, .form-row.two, .form-row.three, .form-row.five{
+    grid-template-columns:1fr !important;
+    gap:12px
+  }
+
+  /* Inputs bigger tap targets */
+  .field input,.field select,.field textarea{
+    font-size:15px;padding:11px 12px
+  }
+  .rupee-wrap input{padding-left:22px}
+
+  /* Button row stacks */
+  .btn-row{flex-direction:column;align-items:stretch}
+  .btn-row .btn{justify-content:center;padding:12px 16px;font-size:14px}
+  .btn-row span#slInfo{text-align:center}
+
+  /* Stats grid 2x2 */
+  .month-stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-val{font-size:20px}
+  .stat-box{padding:12px 14px}
+
+  /* Filter row stacks */
+  .filter-row{flex-direction:column;align-items:stretch}
+  .filter-row input{min-width:0}
+  .total-display{text-align:center}
+
+  /* Services list — hide dept column, tighten */
+  .svc-list-header{grid-template-columns:28px 28px 1fr 60px}
+  .svc-item{grid-template-columns:28px 28px 1fr 60px}
+  .svc-dept{display:none}
+
+  /* Counter widget stacks vertically */
+  .ctr-widget{flex-direction:column !important}
+  .ctr-left{border-radius:var(--radius) var(--radius) 0 0 !important;min-width:unset !important;padding:14px 20px !important;flex-direction:row !important;gap:14px !important;justify-content:center !important}
+  .ctr-right{border-left:1.5px solid var(--border) !important;border-top:none !important;border-radius:0 0 var(--radius) var(--radius) !important;grid-template-columns:1fr 1fr}
+
+  /* Step list smaller */
+  .step-item{font-size:12.5px;gap:10px}
+  .step-item::before{width:22px;height:22px;font-size:11px}
+
+  /* Script block scrollable */
+  pre.script-block{font-size:11px;padding:14px}
+
+  /* Config manual override full width */
+  .override-row{flex-direction:column !important;align-items:stretch !important}
+  .override-row .field{max-width:none !important}
+  .override-row .btn{width:100%;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-badge">FORM 3C</span>
+    <div>
+      <div class="brand-title">Daily Case Register</div>
+      <div class="brand-sub">Rule 6F(3) · Income Tax Rules 1962</div>
+    </div>
+  </div>
+  <div class="sync-indicator">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">Not configured</span>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('entry',this)">📋 New Entry</button>
+  <button class="tab-btn" onclick="switchTab('records',this)">📊 Current Month Records</button>
+  <button class="tab-btn" onclick="switchTab('services',this)">🗂️ List of Services</button>
+  <button class="tab-btn" onclick="switchTab('config',this)">⚙️ GSheets Configuration</button>
+</nav>
+
+<!-- ══════ TAB 1 — NEW ENTRY ══════ -->
+<div class="tab-panel active" id="tab-entry">
+  <div class="panel-wrap">
+    <div class="card">
+      <div class="card-title">📋 New Patient Entry</div>
+
+      <!-- Row 1: Receipt Date | Sl No | Patient Name | UHID -->
+      <div class="form-row row-entry-top">
+        <div class="field">
+          <label><span class="col-ref">(1) </span>Date of Receipt</label>
+          <input type="date" id="receiptDate">
+        </div>
+        <div class="field">
+          <label><span class="col-ref">(2) </span>Serial No.</label>
+          <input type="number" id="slNo" placeholder="Auto" min="1" style="width:100%">
+        </div>
+        <div class="field">
+          <label><span class="col-ref">(3) </span>Name of Patient</label>
+          <input type="text" id="patientName" placeholder="Full name of patient">
+        </div>
+        <div class="field">
+          <label><span class="col-ref">(4) </span>UHID</label>
+          <input type="text" id="uhid" placeholder="Unique Health ID">
+        </div>
+      </div>
+
+      <!-- Row 2: Services | Fees -->
+      <div class="form-row row-entry-mid" style="margin-top:4px">
+        <div class="field">
+          <label><span class="col-ref">(5) </span>Nature of Services</label>
+          <select id="serviceSelect">
+            <option value="">— Select service —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><span class="col-ref">(6) </span>Fees Received</label>
+          <div class="rupee-wrap">
+            <span class="sym">₹</span>
+            <input type="number" id="fees" placeholder="0.00" min="0" step="0.01">
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Nature of Payment | Mode of Payment | Notes -->
+      <div class="form-row row-entry-bot" style="margin-top:4px">
+        <div class="field">
+          <label><span class="col-ref">(7) </span>Nature of Payment</label>
+          <select id="paymentNature">
+            <option value="Full Payment">✅ Full Payment</option>
+            <option value="Part Payment">⏳ Part Payment</option>
+            <option value="Advance">💰 Advance</option>
+            <option value="Balance Due">🔔 Balance Due</option>
+            <option value="Free / Concession">🤝 Free / Concession</option>
+            <option value="Insurance Claim">🏥 Insurance Claim</option>
+            <option value="Waived Off">✋ Waived Off</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><span class="col-ref">(8) </span>Mode of Payment</label>
+          <select id="paymentMode">
+            <option value="Cash">💵 Cash</option>
+            <option value="UPI">📱 UPI</option>
+            <option value="Card">💳 Card (Debit/Credit)</option>
+            <option value="NEFT/RTGS">🏦 NEFT / RTGS</option>
+            <option value="Cheque">📝 Cheque</option>
+            <option value="Online">🌐 Online</option>
+            <option value="Other">• Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label><span class="col-ref">(9) </span>Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">(optional)</span></label>
+          <input type="text" id="notes" placeholder="Any additional details…">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="submitBtn" onclick="submitEntry()">➕ Add to Register</button>
+        <button class="btn btn-secondary" onclick="clearEntryForm()">Clear</button>
+        <span id="slInfo" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3)"></span>
+      </div>
+      <div class="status" id="entryStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ TAB 2 — CURRENT MONTH RECORDS ══════ -->
+<div class="tab-panel" id="tab-records">
+  <div class="panel-wrap">
+    <div class="month-stats">
+      <div class="stat-box"><div class="stat-label">Total Patients</div><div class="stat-val accent" id="statPatients">—</div></div>
+      <div class="stat-box"><div class="stat-label">Total Fees</div><div class="stat-val green" id="statFees">—</div></div>
+      <div class="stat-box"><div class="stat-label">Today's Patients</div><div class="stat-val" id="statToday">—</div></div>
+      <div class="stat-box"><div class="stat-label">Month</div><div class="stat-val" id="statMonth" style="font-size:15px">—</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Records — <span id="monthLabel">—</span></div>
+      <div class="filter-row">
+        <input type="text" id="searchBox" placeholder="🔍 Search patient name or service…" oninput="filterRecords()">
+        <button class="btn btn-secondary btn-sm" onclick="loadMonthRecords()">🔄 Refresh</button>
+        <div class="total-display" id="filteredTotal">₹ 0.00</div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><span class="ref">(1)</span>Receipt Date</th>
+              <th><span class="ref">(2)</span>Sl. No.</th>
+              <th><span class="ref">(3)</span>Patient Name</th>
+              <th><span class="ref">(4)</span>UHID</th>
+              <th><span class="ref">(5)</span>Services</th>
+              <th><span class="ref">(6)</span>Fees (₹)</th>
+              <th><span class="ref">(7)</span>Pmt Nature</th>
+              <th><span class="ref">(8)</span>Pmt Mode</th>
+              <th><span class="ref">(9)</span>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody">
+            <tr class="empty-row"><td colspan="9">No entries yet for this month. Add records from the New Entry tab.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="status" id="recordsStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ TAB 3 — LIST OF SERVICES ══════ -->
+<div class="tab-panel" id="tab-services">
+  <div class="panel-wrap">
+    <div class="card">
+      <div class="card-title">🗂️ Manage Services List</div>
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:20px;line-height:1.7">
+        Add services below. Drag <strong>⠿</strong> to reorder. The order here is the order shown in the dropdown on New Entry.
+      </p>
+
+      <!-- Add bar -->
+      <div class="svc-add-bar">
+        <div class="field">
+          <label>Service Name</label>
+          <input type="text" id="newServiceName" placeholder="e.g. General Consultation, X-Ray…" onkeydown="if(event.key==='Enter')addService()">
+        </div>
+        <div class="field" style="max-width:180px">
+          <label>Department</label>
+          <input type="text" id="newServiceDept" placeholder="e.g. OPD, Surgery…" onkeydown="if(event.key==='Enter')addService()">
+        </div>
+        <button class="btn btn-success" onclick="addService()" style="margin-bottom:1px">➕ Add</button>
+      </div>
+      <div class="status" id="serviceStatus"></div>
+
+      <!-- Sortable list -->
+      <div style="margin-top:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">
+          Services (<span id="serviceCount">0</span>) — drag to reorder
+        </div>
+        <div class="svc-list">
+          <div class="svc-list-header">
+            <span></span><span>#</span><span>Service Name</span><span>Department</span><span></span>
+          </div>
+          <div id="svcListBody"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="loadDefaultServices()">📦 Load Defaults</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAllServices()">🗑️ Clear All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ TAB 4 — GSHEETS CONFIGURATION ══════ -->
+<div class="tab-panel" id="tab-config">
+  <div class="panel-wrap">
+
+    <!-- SERIAL COUNTER CARD -->
+    <div class="card">
+      <div class="card-title">🔢 Serial Number Counter</div>
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:20px;line-height:1.7">
+        This counter drives the <strong>Sl. No.</strong> on the New Entry tab. It increments automatically after every saved entry.
+        You can manually override it at any time — e.g. at the start of a new financial year or to correct a mismatch.
+      </p>
+
+      <div class="ctr-widget" style="display:flex;align-items:stretch;gap:0;margin-bottom:20px">
+        <div class="ctr-left" style="background:var(--ink);border-radius:var(--radius) 0 0 var(--radius);padding:18px 28px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:130px">
+          <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px">Next Sl. No.</span>
+          <span id="counterDisplay" style="font-family:'DM Mono',monospace;font-size:42px;font-weight:700;color:#fff;line-height:1">—</span>
+        </div>
+        <div class="ctr-right" style="flex:1;border:1.5px solid var(--border);border-left:none;border-radius:0 var(--radius) var(--radius) 0;padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 20px">
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Total Entries</div>
+            <div id="ctrTotalEntries" style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--ink)">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Today's Entries</div>
+            <div id="ctrTodayEntries" style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--accent)">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">This Month</div>
+            <div id="ctrMonthEntries" style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:var(--blue)">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Last Entry</div>
+            <div id="ctrLastEntry" style="font-size:12px;color:var(--ink2);margin-top:2px;line-height:1.4">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--gold-bg);border:1.5px solid var(--gold-border);border-radius:var(--radius);padding:16px 20px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px">⚙ Manual Override</div>
+        <div class="override-row" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div class="field" style="max-width:160px">
+            <label>Set Next Sl. No. to</label>
+            <input type="number" id="manualSlNo" min="1" placeholder="e.g. 1 or 501">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="applyManualSlNo()" style="margin-bottom:1px">✓ Apply</button>
+          <button class="btn btn-secondary btn-sm" onclick="recalcSlNo()" style="margin-bottom:1px">↺ Recalculate from Records</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--gold);margin-top:10px;line-height:1.6">
+          Use <em>Recalculate</em> to sync with actual saved records. Use <em>Set manually</em> to start from a custom number.
+        </p>
+      </div>
+      <!-- Reset info strip -->
+      <div style="margin-top:14px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:4px;font-size:12px;color:var(--blue)">
+        <span style="font-size:15px">🔄</span>
+        <span id="ctrResetInfo">Resets on 1st of each month (IST) · Last reset: —</span>
+      </div>
+      <div class="status" id="counterStatus"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚙️ Google Sheets Connection</div>
+      <div class="form-row two">
+        <div class="field">
+          <label>Hospital / Clinic Name</label>
+          <input type="text" id="cfgHospital" placeholder="e.g. City Medical Centre">
+        </div>
+        <div class="field">
+          <label>Department</label>
+          <input type="text" id="cfgDept" placeholder="e.g. General Medicine, Surgery">
+        </div>
+      </div>
+      <div class="field" style="margin-top:4px">
+        <label>Google Apps Script Web App URL</label>
+        <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+        <span style="font-size:11.5px;color:var(--ink3);margin-top:4px;display:block">Paste the URL generated after deploying the Apps Script below.</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveConfig()">💾 Save Configuration</button>
+        <button class="btn btn-secondary" onclick="testConnection()">🔌 Test Connection</button>
+      </div>
+      <div class="status" id="configStatus"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📌 One-Time Setup (Google Apps Script)</div>
+      <div class="step-list">
+        <div class="step-item">Open <a href="https://sheets.google.com" target="_blank" style="color:var(--accent);font-weight:600">Google Sheets</a> → create a new spreadsheet. Rename the first sheet tab to exactly: <strong>Form3C</strong></div>
+        <div class="step-item">Row 1 headers (A → I): <code style="background:var(--surface2);padding:3px 8px;border-radius:3px;font-family:'DM Mono',monospace;font-size:12px;border:1px solid var(--border)">Date | SlNo | PatientName | Services | Fees | ReceiptDate | PaymentMode | Notes | SubmittedAt</code></div>
+        <div class="step-item">Click <strong>Extensions → Apps Script</strong>. Delete existing code, paste the script below.</div>
+        <div class="step-item"><strong>Deploy → New Deployment</strong> · Type: Web App · Execute as: <em>Me</em> · Who has access: <em>Anyone</em> · Click Deploy &amp; Authorize.</div>
+        <div class="step-item">Copy the <strong>Web App URL</strong> → paste above → Save Configuration.</div>
+      </div>
+
+<pre class="script-block"><span class="cm">// ── FORM 3C — Google Apps Script ──────────────────────────────
+// Sheet tab must be named: Form3C
+// Columns A→I: Date | SlNo | PatientName | Services | Fees |
+//              ReceiptDate | PaymentMode | Notes | SubmittedAt
+// Auto-sorts entire sheet by ReceiptDate (col F) after every new entry.</span>
+
+<span class="cm">// ── Helper: any date value → JS Date object for sorting ──</span>
+<span class="kw">function</span> <span class="fn">toDate_</span>(val) {
+  <span class="kw">if</span> (!val) <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Date</span>(0);
+  <span class="kw">if</span> (val <span class="kw">instanceof</span> Date) <span class="kw">return</span> val;
+  <span class="kw">var</span> s = String(val).<span class="fn">trim</span>();
+  <span class="cm">// YYYY-MM-DD</span>
+  <span class="kw">if</span> (/^\d{4}-\d{2}-\d{2}$/<span class="fn">.test</span>(s)) <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Date</span>(s);
+  <span class="cm">// DD/MM/YYYY</span>
+  <span class="kw">var</span> p = s.<span class="fn">match</span>(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  <span class="kw">if</span> (p) <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Date</span>(p[3]+<span class="str">'-'</span>+p[2].<span class="fn">padStart</span>(2,<span class="str">'0'</span>)+<span class="str">'-'</span>+p[1].<span class="fn">padStart</span>(2,<span class="str">'0'</span>));
+  <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Date</span>(s);
+}
+
+<span class="cm">// ── Helper: any date value → "YYYY-MM-DD" string ──</span>
+<span class="kw">function</span> <span class="fn">toISO_</span>(val) {
+  <span class="kw">var</span> d = <span class="fn">toDate_</span>(val);
+  <span class="kw">if</span> (isNaN(d)) <span class="kw">return</span> String(val);
+  <span class="kw">var</span> y = d.<span class="fn">getFullYear</span>();
+  <span class="kw">var</span> m = String(d.<span class="fn">getMonth</span>()+1).<span class="fn">padStart</span>(2,<span class="str">'0'</span>);
+  <span class="kw">var</span> dd = String(d.<span class="fn">getDate</span>()).<span class="fn">padStart</span>(2,<span class="str">'0'</span>);
+  <span class="kw">return</span> y+<span class="str">'-'</span>+m+<span class="str">'-'</span>+dd;
+}
+
+<span class="cm">// ── Sort data rows by ReceiptDate (column F, index 5), ascending ──</span>
+<span class="kw">function</span> <span class="fn">sortByReceiptDate_</span>(sheet) {
+  <span class="kw">var</span> lastRow = sheet.<span class="fn">getLastRow</span>();
+  <span class="kw">if</span> (lastRow < 3) <span class="kw">return</span>; <span class="cm">// nothing to sort (only header + 1 row)</span>
+  <span class="kw">var</span> dataRange = sheet.<span class="fn">getRange</span>(2, 1, lastRow - 1, sheet.<span class="fn">getLastColumn</span>());
+  <span class="kw">var</span> data = dataRange.<span class="fn">getValues</span>();
+
+  data.<span class="fn">sort</span>(<span class="kw">function</span>(a, b) {
+    <span class="kw">var</span> da = <span class="fn">toDate_</span>(a[5]); <span class="cm">// col F = index 5 = ReceiptDate</span>
+    <span class="kw">var</span> db = <span class="fn">toDate_</span>(b[5]);
+    <span class="kw">if</span> (da < db) <span class="kw">return</span> -1;
+    <span class="kw">if</span> (da > db) <span class="kw">return</span>  1;
+    <span class="cm">// Tie-break: sort by SlNo (col B = index 1)</span>
+    <span class="kw">return</span> (parseInt(a[1])||0) - (parseInt(b[1])||0);
+  });
+
+  dataRange.<span class="fn">setValues</span>(data);
+}
+
+<span class="cm">// ── POST: receive new entry, append, then sort ──</span>
+<span class="kw">function</span> <span class="fn">doPost</span>(e) {
+  <span class="kw">var</span> sheet = SpreadsheetApp.<span class="fn">getActiveSpreadsheet</span>().<span class="fn">getSheetByName</span>(<span class="str">"Form3C"</span>);
+  <span class="kw">var</span> d     = JSON.<span class="fn">parse</span>(e.postData.contents);
+
+  sheet.<span class="fn">appendRow</span>([
+    d.receiptDate,
+    d.slNo,
+    d.patientName,
+    d.uhid         || <span class="str">""</span>,
+    d.services,
+    d.fees,
+    d.paymentNature || <span class="str">""</span>,
+    d.paymentMode   || <span class="str">""</span>,
+    d.notes         || <span class="str">""</span>,
+    <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toLocaleString</span>(<span class="str">"en-IN"</span>)
+  ]);
+
+  <span class="cm">// Sort entire sheet by receipt date immediately after append</span>
+  <span class="fn">sortByReceiptDate_</span>(sheet);
+
+  <span class="kw">return</span> ContentService
+    .<span class="fn">createTextOutput</span>(JSON.<span class="fn">stringify</span>({status:<span class="str">"success"</span>}))
+    .<span class="fn">setMimeType</span>(ContentService.MimeType.JSON);
+}
+
+<span class="cm">// ── GET: fetch serial number or monthly rows ──</span>
+<span class="kw">function</span> <span class="fn">doGet</span>(e) {
+  <span class="kw">var</span> action   = e.parameter.action;
+  <span class="kw">var</span> callback = e.parameter.callback;
+  <span class="kw">var</span> sheet    = SpreadsheetApp.<span class="fn">getActiveSpreadsheet</span>().<span class="fn">getSheetByName</span>(<span class="str">"Form3C"</span>);
+  <span class="kw">var</span> rows     = sheet.<span class="fn">getDataRange</span>().<span class="fn">getValues</span>();
+
+  <span class="kw">function</span> <span class="fn">respond</span>(obj) {
+    <span class="kw">var</span> json = JSON.<span class="fn">stringify</span>(obj);
+    <span class="kw">var</span> out  = callback ? callback + <span class="str">"("</span> + json + <span class="str">")"</span> : json;
+    <span class="kw">return</span> ContentService.<span class="fn">createTextOutput</span>(out)
+      .<span class="fn">setMimeType</span>(ContentService.MimeType.JAVASCRIPT);
+  }
+
+  <span class="cm">// Next serial number: highest SlNo in sheet + 1</span>
+  <span class="kw">if</span> (action === <span class="str">"getSlNo"</span>) {
+    <span class="kw">var</span> maxSl = 0;
+    <span class="kw">for</span> (<span class="kw">var</span> i = 1; i < rows.length; i++) {
+      <span class="kw">var</span> v = parseInt(rows[i][1]);
+      <span class="kw">if</span> (!isNaN(v) && v > maxSl) maxSl = v;
+    }
+    <span class="kw">return</span> <span class="fn">respond</span>({status:<span class="str">"ok"</span>, nextSl: maxSl + 1});
+  }
+
+  <span class="cm">// Monthly rows filtered by ReceiptDate (col F)</span>
+  <span class="kw">if</span> (action === <span class="str">"getMonth"</span>) {
+    <span class="kw">var</span> ym  = e.parameter.ym;
+    <span class="kw">var</span> out = [];
+    <span class="kw">for</span> (<span class="kw">var</span> i = 1; i < rows.length; i++) {
+      <span class="kw">var</span> receiptISO = <span class="fn">toISO_</span>(rows[i][5]); <span class="cm">// filter by ReceiptDate</span>
+      <span class="kw">if</span> (receiptISO.<span class="fn">startsWith</span>(ym)) {
+        out.<span class="fn">push</span>([
+          <span class="fn">toISO_</span>(rows[i][0]), <span class="cm">// Date</span>
+          rows[i][1],          <span class="cm">// SlNo</span>
+          rows[i][2],          <span class="cm">// PatientName</span>
+          rows[i][3],          <span class="cm">// Services</span>
+          rows[i][4],          <span class="cm">// Fees</span>
+          receiptISO,          <span class="cm">// ReceiptDate (ISO)</span>
+          rows[i][6],          <span class="cm">// PaymentMode</span>
+          rows[i][7]           <span class="cm">// Notes</span>
+        ]);
+      }
+    }
+    <span class="kw">return</span> <span class="fn">respond</span>({status:<span class="str">"ok"</span>, rows: out});
+  }
+
+  <span class="kw">return</span> <span class="fn">respond</span>({status:<span class="str">"ok"</span>});
+}
+
+<span class="cm">// ── Optional: manually trigger a full sort from the Sheet menu ──</span>
+<span class="kw">function</span> <span class="fn">sortSheetNow</span>() {
+  <span class="kw">var</span> sheet = SpreadsheetApp.<span class="fn">getActiveSpreadsheet</span>().<span class="fn">getSheetByName</span>(<span class="str">"Form3C"</span>);
+  <span class="fn">sortByReceiptDate_</span>(sheet);
+  SpreadsheetApp.<span class="fn">getUi</span>().<span class="fn">alert</span>(<span class="str">"✅ Sheet sorted by Receipt Date!"</span>);
+}</pre>
+      <p class="code-note">⚠️ Sheet columns (A→J): ReceiptDate | SlNo | PatientName | UHID | Services | Fees | PaymentNature | PaymentMode | Notes | SubmittedAt</p>
+      <p class="code-note" style="margin-top:6px">🔃 The sheet is automatically sorted by <strong>Receipt Date</strong> (ascending) after every new entry. Within the same receipt date, rows are ordered by Sl. No.</p>
+      <p class="code-note" style="margin-top:6px">💡 You can also run <strong>sortSheetNow()</strong> manually from Apps Script anytime to re-sort the entire existing sheet.</p>
+      <p class="code-note" style="margin-top:6px">⚠️ After pasting, create a <strong>New Deployment</strong> (not "Edit existing") to apply changes.</p>
+    </div>
+  </div>
+</div>
+
+<footer class="app-footer">
+  <strong>Form No. 3C</strong> · Daily Case Register · Rule 6F(3), Income Tax Rules 1962
+</footer>
+
+<script>
+// ══════════ STATE ══════════
+const STATE = { services:[], config:{}, allRecords:[], dragSrcIdx:null };
+
+// ══════════ LOCAL RECORDS STORAGE ══════════
+const RECORDS_KEY = 'f3c_records';
+
+function loadAllRecords() {
+  try { STATE.allRecords = JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]'); }
+  catch(e) { STATE.allRecords = []; }
+}
+function saveAllRecords() {
+  localStorage.setItem(RECORDS_KEY, JSON.stringify(STATE.allRecords));
+}
+function getMonthRecords() {
+  const ym = getCurrentYearMonth();
+  return STATE.allRecords.filter(r => r.date && r.date.startsWith(ym));
+}
+
+// ══════════ INIT ══════════
+window.onload = function () {
+  loadConfig();
+  loadServicesFromStorage();
+  loadAllRecords();
+  setTodayDates();
+  setNextSlNo();
+  renderServiceDropdown();
+  renderSvcList();
+  updateSyncIndicator();
+  updateMonthLabel();
+  refreshCounterWidget();
+};
+
+// ══════════ TAB SWITCHING ══════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'records') loadMonthRecords();
+  if (id === 'services') renderSvcList();
+  if (id === 'config') refreshCounterWidget();
+}
+
+// ══════════ CONFIG ══════════
+function loadConfig() {
+  STATE.config = {
+    url:      localStorage.getItem('f3c_url')      || '',
+    hospital: localStorage.getItem('f3c_hospital') || '',
+    dept:     localStorage.getItem('f3c_dept')     || ''
+  };
+  if (STATE.config.url)      document.getElementById('cfgUrl').value      = STATE.config.url;
+  if (STATE.config.hospital) document.getElementById('cfgHospital').value = STATE.config.hospital;
+  if (STATE.config.dept)     document.getElementById('cfgDept').value     = STATE.config.dept;
+}
+function saveConfig() {
+  STATE.config.url      = document.getElementById('cfgUrl').value.trim();
+  STATE.config.hospital = document.getElementById('cfgHospital').value.trim();
+  STATE.config.dept     = document.getElementById('cfgDept').value.trim();
+  localStorage.setItem('f3c_url',      STATE.config.url);
+  localStorage.setItem('f3c_hospital', STATE.config.hospital);
+  localStorage.setItem('f3c_dept',     STATE.config.dept);
+  showStatus('configStatus', '✅ Configuration saved!', 'success');
+  updateSyncIndicator();
+}
+async function testConnection() {
+  if (!STATE.config.url) { showStatus('configStatus', '⚠️ Enter the Web App URL first.', 'warning'); return; }
+  setSyncLoading();
+  try {
+    await fetch(STATE.config.url + '?action=ping', { mode:'no-cors' });
+    showStatus('configStatus', '✅ URL accepted. Note: GSheet submit still works via no-cors POST.', 'success');
+    setSyncActive();
+  } catch(e) {
+    showStatus('configStatus', '❌ Could not reach. Check URL.', 'error');
+    setSyncError();
+  }
+}
+
+// ══════════ SERIAL NUMBER COUNTER ══════════
+// Source of truth: localStorage keys:
+//   f3c_next_sl       — the next serial number to use
+//   f3c_sl_reset_ym   — the YYYY-MM (IST) when counter was last reset
+// Auto-resets to 1 on the 1st of every month (Indian Standard Time, UTC+5:30).
+
+const SL_KEY       = 'f3c_next_sl';
+const SL_RESET_KEY = 'f3c_sl_reset_ym';
+
+// Return current YYYY-MM in IST (UTC+5:30)
+function getISTYearMonth() {
+  const now      = new Date();
+  const istMs    = now.getTime() + (5 * 60 + 30) * 60 * 1000; // shift to IST
+  const istDate  = new Date(istMs);
+  const y = istDate.getUTCFullYear();
+  const m = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+  return y + '-' + m;
+}
+
+// Return current date YYYY-MM-DD in IST
+function getISTDateISO() {
+  const now     = new Date();
+  const istMs   = now.getTime() + (5 * 60 + 30) * 60 * 1000;
+  const istDate = new Date(istMs);
+  const y  = istDate.getUTCFullYear();
+  const m  = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+  const d  = String(istDate.getUTCDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+// Check if counter needs a monthly reset (runs silently on every page load & entry)
+function checkMonthlyReset() {
+  const currentYM  = getISTYearMonth();
+  const lastReset  = localStorage.getItem(SL_RESET_KEY) || '';
+  if (lastReset !== currentYM) {
+    // New month in IST — reset counter to 1
+    localStorage.setItem(SL_KEY, '1');
+    localStorage.setItem(SL_RESET_KEY, currentYM);
+    return true; // was reset
+  }
+  return false;
+}
+
+function getNextSlNo() {
+  checkMonthlyReset(); // always check before reading
+  return parseInt(localStorage.getItem(SL_KEY) || '1');
+}
+function setSlCounter(val) {
+  const n = Math.max(1, parseInt(val) || 1);
+  localStorage.setItem(SL_KEY, String(n));
+  // Also update reset marker to current month so manual set isn't wiped immediately
+  localStorage.setItem(SL_RESET_KEY, getISTYearMonth());
+  return n;
+}
+function bumpSlCounter() {
+  const next = getNextSlNo() + 1;
+  localStorage.setItem(SL_KEY, String(next));
+  return next;
+}
+
+// Write current counter value into the New Entry Sl. No. field
+function setNextSlNo() {
+  const n     = getNextSlNo();
+  const inp   = document.getElementById('slNo');
+  const today = getTodayISO();
+  const todayCnt = STATE.allRecords.filter(r => r.date === today).length;
+  inp.value = n;
+  document.getElementById('slInfo').textContent =
+    todayCnt > 0 ? '(' + todayCnt + ' entries today)' : '(first entry today)';
+}
+
+// Fetch button on New Entry tab
+function fetchSlNo() {
+  setNextSlNo();
+  document.getElementById('slInfo').textContent = '✓ Current counter value';
+}
+
+// Refresh the big counter widget on Config tab
+function refreshCounterWidget() {
+  const today   = getTodayISO();
+  const ym      = getCurrentYearMonth();
+  const istYM   = getISTYearMonth();
+  const next    = getNextSlNo();
+  const total   = STATE.allRecords.length;
+  const todayCnt  = STATE.allRecords.filter(r => r.date === today).length;
+  const monthCnt  = STATE.allRecords.filter(r => r.date && r.date.startsWith(ym)).length;
+  const lastReset = localStorage.getItem(SL_RESET_KEY) || '—';
+  const last      = STATE.allRecords.length
+    ? STATE.allRecords[STATE.allRecords.length - 1] : null;
+
+  const el = document.getElementById('counterDisplay');
+  if (el) el.textContent = next;
+  const te = document.getElementById('ctrTotalEntries');
+  if (te) te.textContent = total;
+  const tod = document.getElementById('ctrTodayEntries');
+  if (tod) tod.textContent = todayCnt;
+  const mon = document.getElementById('ctrMonthEntries');
+  if (mon) mon.textContent = monthCnt;
+  const le = document.getElementById('ctrLastEntry');
+  if (le) {
+    if (last) {
+      le.innerHTML = '<strong>Sl.' + escHtml(String(last.slNo)) + '</strong> — '
+        + escHtml(last.patientName) + '<br><span style="color:var(--ink3)">' + escHtml(last.date) + '</span>';
+    } else {
+      le.textContent = 'No entries yet';
+    }
+  }
+
+  // Show reset info badge inside counter widget if element exists
+  const ri = document.getElementById('ctrResetInfo');
+  if (ri) {
+    ri.textContent = 'Resets on 1st of each month (IST) · Last reset: ' + lastReset;
+  }
+}
+
+// Manual override from Config tab
+function applyManualSlNo() {
+  const val = document.getElementById('manualSlNo').value;
+  if (!val || isNaN(val) || parseInt(val) < 1) {
+    showStatus('counterStatus', '⚠️ Enter a valid number (≥ 1).', 'warning'); return;
+  }
+  const n = setSlCounter(parseInt(val));
+  setNextSlNo();
+  refreshCounterWidget();
+  document.getElementById('manualSlNo').value = '';
+  showStatus('counterStatus', '✅ Counter set to ' + n + '. Auto-reset on 1st of next month (IST) is preserved.', 'success');
+}
+
+// Recalculate counter from actual saved records
+function recalcSlNo() {
+  const ym = getISTYearMonth(); // only look at current month's records
+  const thisMonthRecords = STATE.allRecords.filter(r => r.date && r.date.startsWith(ym));
+  if (!thisMonthRecords.length) {
+    setSlCounter(1);
+    setNextSlNo();
+    refreshCounterWidget();
+    showStatus('counterStatus', 'ℹ️ No records for this month — counter reset to 1.', 'info');
+    return;
+  }
+  const maxSl = thisMonthRecords.reduce((mx, r) => {
+    const v = parseInt(r.slNo);
+    return (!isNaN(v) && v > mx) ? v : mx;
+  }, 0);
+  const next = maxSl + 1;
+  setSlCounter(next);
+  setNextSlNo();
+  refreshCounterWidget();
+  showStatus("counterStatus", "✅ Recalculated from this month's records — highest Sl. No.: " + maxSl + " → Next: " + next + ".", "success");
+}
+
+// Periodic check — runs every 60 seconds to catch midnight month-change while browser is open
+setInterval(function() {
+  const wasReset = checkMonthlyReset();
+  if (wasReset) {
+    setNextSlNo();
+    refreshCounterWidget();
+    console.log('[Form3C] Counter auto-reset to 1 (new month, IST).');
+  }
+}, 60000);
+
+// ══════════ SERVICES ══════════
+const DEFAULT_SERVICES = [
+  { name:'General Consultation',   dept:'OPD'          },
+  { name:'Follow-up Consultation', dept:'OPD'          },
+  { name:'Minor Surgery',          dept:'Surgery'      },
+  { name:'Major Surgery',          dept:'Surgery'      },
+  { name:'Injection / IV Drip',    dept:'OPD'          },
+  { name:'Dressing / Wound Care',  dept:'OPD'          },
+  { name:'Home Visit',             dept:'OPD'          },
+  { name:'Pathology / Lab Test',   dept:'Pathology'    },
+  { name:'X-Ray',                  dept:'Radiology'    },
+  { name:'Ultrasound / Scan',      dept:'Radiology'    },
+  { name:'ECG',                    dept:'Cardiology'   },
+  { name:'Dental Consultation',    dept:'Dental'       },
+  { name:'Dental Procedure',       dept:'Dental'       },
+  { name:'Eye Examination',        dept:'Ophthalmology'},
+  { name:'Emergency Care',         dept:'Emergency'    }
+];
+function loadServicesFromStorage() {
+  try { STATE.services = JSON.parse(localStorage.getItem('f3c_services') || 'null') || [...DEFAULT_SERVICES]; }
+  catch(e) { STATE.services = [...DEFAULT_SERVICES]; }
+  saveServicesToStorage();
+}
+function saveServicesToStorage() { localStorage.setItem('f3c_services', JSON.stringify(STATE.services)); }
+
+function addService() {
+  const name = document.getElementById('newServiceName').value.trim();
+  const dept = document.getElementById('newServiceDept').value.trim();
+  if (!name) { showStatus('serviceStatus','⚠️ Enter a service name.','warning'); return; }
+  if (STATE.services.find(s => s.name.toLowerCase()===name.toLowerCase())) {
+    showStatus('serviceStatus','⚠️ Service already exists.','warning'); return;
+  }
+  STATE.services.push({ name, dept:dept||'' });
+  saveServicesToStorage(); renderSvcList(); renderServiceDropdown();
+  document.getElementById('newServiceName').value='';
+  document.getElementById('newServiceDept').value='';
+  showStatus('serviceStatus','✅ "'+name+'" added.','success');
+}
+function removeService(idx) {
+  if (!confirm('Remove "'+STATE.services[idx].name+'"?')) return;
+  STATE.services.splice(idx,1);
+  saveServicesToStorage(); renderSvcList(); renderServiceDropdown();
+}
+function loadDefaultServices() {
+  if (!confirm('Add all default services? Existing ones kept.')) return;
+  DEFAULT_SERVICES.forEach(ds => {
+    if (!STATE.services.find(s => s.name.toLowerCase()===ds.name.toLowerCase()))
+      STATE.services.push(ds);
+  });
+  saveServicesToStorage(); renderSvcList(); renderServiceDropdown();
+  showStatus('serviceStatus','✅ Default services loaded.','success');
+}
+function clearAllServices() {
+  if (!confirm('Clear ALL services?')) return;
+  STATE.services=[];
+  saveServicesToStorage(); renderSvcList(); renderServiceDropdown();
+  showStatus('serviceStatus','ℹ️ All services cleared.','info');
+}
+
+function renderSvcList() {
+  const body = document.getElementById('svcListBody');
+  document.getElementById('serviceCount').textContent = STATE.services.length;
+  renderServiceDropdown();
+  if (!STATE.services.length) {
+    body.innerHTML='<div class="svc-empty">No services yet — add one above or click Load Defaults</div>';
+    return;
+  }
+  body.innerHTML = STATE.services.map((s,i) => `
+    <div class="svc-item" draggable="true" data-idx="${i}"
+         ondragstart="dragStart(event,${i})" ondragover="dragOver(event,${i})"
+         ondrop="dragDrop(event,${i})" ondragend="dragEnd(event)">
+      <span class="drag-handle" title="Drag to reorder">⠿</span>
+      <span class="svc-num">${i+1}</span>
+      <span class="svc-name">${escHtml(s.name)}</span>
+      <span class="svc-dept">${escHtml(s.dept||'—')}</span>
+      <div class="svc-actions"><button class="btn-del-svc" onclick="removeService(${i})">✕ Remove</button></div>
+    </div>`).join('');
+}
+function dragStart(e,idx){ STATE.dragSrcIdx=idx; e.dataTransfer.effectAllowed='move'; e.currentTarget.classList.add('dragging'); }
+function dragOver(e,idx){ e.preventDefault(); e.dataTransfer.dropEffect='move'; document.querySelectorAll('.svc-item').forEach(el=>el.classList.remove('drag-over')); if(idx!==STATE.dragSrcIdx) e.currentTarget.classList.add('drag-over'); }
+function dragDrop(e,idx){ e.preventDefault(); if(STATE.dragSrcIdx===null||STATE.dragSrcIdx===idx) return; const m=STATE.services.splice(STATE.dragSrcIdx,1)[0]; STATE.services.splice(idx,0,m); saveServicesToStorage(); renderSvcList(); }
+function dragEnd(e){ STATE.dragSrcIdx=null; document.querySelectorAll('.svc-item').forEach(el=>el.classList.remove('dragging','drag-over')); }
+function renderServiceDropdown() {
+  const sel=document.getElementById('serviceSelect'), cur=sel.value;
+  sel.innerHTML='<option value="">— Select service —</option>';
+  STATE.services.forEach(s=>{ const o=document.createElement('option'); o.value=s.name; o.textContent=s.name+(s.dept?' ('+s.dept+')':''); sel.appendChild(o); });
+  if(cur) sel.value=cur;
+}
+
+// ══════════ NEW ENTRY — SAVE TO LOCALSTORAGE ══════════
+function submitEntry() {
+  const receiptDate  = document.getElementById('receiptDate').value;
+  const slNo         = document.getElementById('slNo').value.trim();
+  const patientName  = document.getElementById('patientName').value.trim();
+  const uhid         = document.getElementById('uhid').value.trim();
+  const services     = document.getElementById('serviceSelect').value;
+  const fees         = document.getElementById('fees').value;
+  const paymentNature= document.getElementById('paymentNature').value;
+  const paymentMode  = document.getElementById('paymentMode').value;
+  const notes        = document.getElementById('notes').value.trim();
+
+  if (!receiptDate) { showStatus('entryStatus','⚠️ Date of Receipt is required.','warning'); return; }
+  if (!slNo)        { showStatus('entryStatus','⚠️ Serial number is required.','warning'); return; }
+  if (!patientName) { showStatus('entryStatus','⚠️ Patient name is required.','warning'); return; }
+  if (!services)    { showStatus('entryStatus','⚠️ Please select a service.','warning'); return; }
+
+  const record = {
+    id:           Date.now(),
+    date:         receiptDate,
+    receiptDate,
+    slNo,
+    patientName,
+    uhid,
+    services,
+    fees:         fees || '0',
+    paymentNature,
+    paymentMode,
+    notes,
+    savedAt:      new Date().toLocaleString('en-IN')
+  };
+
+  STATE.allRecords.push(record);
+  saveAllRecords();
+  bumpSlCounter();           // increment persistent counter
+  refreshCounterWidget();    // update config tab widget
+  showStatus('entryStatus', '✅ Entry saved! (Sl. No. ' + slNo + ' — ' + patientName + ')', 'success');
+  clearEntryForm();
+  setNextSlNo();             // show new counter value in Sl. No. field
+
+  // Also try to push to GSheet in background if URL configured (fire and forget)
+  if (STATE.config.url) {
+    fetch(STATE.config.url, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(record)
+    }).catch(()=>{});
+  }
+}
+
+function clearEntryForm() {
+  document.getElementById('patientName').value    = '';
+  document.getElementById('uhid').value           = '';
+  document.getElementById('serviceSelect').value  = '';
+  document.getElementById('fees').value           = '';
+  document.getElementById('paymentNature').value  = 'Full Payment';
+  document.getElementById('paymentMode').value    = 'Cash';
+  document.getElementById('notes').value          = '';
+  setTodayDates();
+}
+
+// ══════════ MONTH RECORDS — FROM LOCALSTORAGE ══════════
+function loadMonthRecords() {
+  const rows = getMonthRecords();
+  STATE.currentMonthRows = rows;
+  renderRecords(rows);
+  updateStats(rows);
+  hideStatus('recordsStatus');
+}
+
+const PM_COLOR = {
+  'Cash':'#166534','UPI':'#1d4ed8','Card':'#6d28d9',
+  'NEFT/RTGS':'#92400e','Cheque':'#374151',
+  'Free / Concession':'#be185d','Insurance':'#0e7490','Other':'#57534e'
+};
+
+function renderRecords(records) {
+  const body = document.getElementById('recordsBody');
+  if (!records || !records.length) {
+    body.innerHTML='<tr class="empty-row"><td colspan="8">No records found for this month.</td></tr>';
+    document.getElementById('filteredTotal').textContent='₹ 0.00';
+    return;
+  }
+  const PM_NATURE_COLOR = {
+    'Full Payment':'#166534','Part Payment':'#92400e','Advance':'#1d4ed8',
+    'Balance Due':'#9b1c1c','Free / Concession':'#be185d',
+    'Insurance Claim':'#0e7490','Waived Off':'#57534e'
+  };
+  body.innerHTML = records.map(r => {
+    const pmCol    = PM_COLOR[r.paymentMode] || '#57534e';
+    const pnCol    = PM_NATURE_COLOR[r.paymentNature] || '#57534e';
+    const pmBadge  = r.paymentMode
+      ? `<span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;background:${pmCol}18;color:${pmCol};border:1px solid ${pmCol}40">${escHtml(r.paymentMode)}</span>`
+      : '—';
+    const pnBadge  = r.paymentNature
+      ? `<span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;background:${pnCol}18;color:${pnCol};border:1px solid ${pnCol}40">${escHtml(r.paymentNature)}</span>`
+      : '—';
+    return `<tr>
+      <td class="mono">${escHtml(r.receiptDate||r.date||'—')}</td>
+      <td class="accent-col">${escHtml(String(r.slNo||'—'))}</td>
+      <td><strong>${escHtml(r.patientName||'—')}</strong></td>
+      <td class="mono" style="font-size:12px">${escHtml(r.uhid||'—')}</td>
+      <td>${escHtml(r.services||'—')}</td>
+      <td class="green-col">${r.fees && r.fees!='0' ? '₹'+parseFloat(r.fees).toLocaleString('en-IN',{minimumFractionDigits:2}) : '—'}</td>
+      <td>${pnBadge}</td>
+      <td>${pmBadge}</td>
+      <td style="color:var(--ink2);font-size:12px">${escHtml(r.notes||'')}</td>
+    </tr>`;
+  }).join('');
+  updateFilteredTotal(records);
+}
+
+function filterRecords() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const rows = getMonthRecords();
+  if (!q) { renderRecords(rows); return; }
+  renderRecords(rows.filter(r =>
+    (r.patientName||'').toLowerCase().includes(q) ||
+    (r.services||'').toLowerCase().includes(q)    ||
+    (r.uhid||'').toLowerCase().includes(q)
+  ));
+}
+
+function updateFilteredTotal(records) {
+  const total = (records||[]).reduce((s,r) => s+(parseFloat(r.fees)||0), 0);
+  document.getElementById('filteredTotal').textContent = '₹ '+total.toLocaleString('en-IN',{minimumFractionDigits:2});
+}
+
+function updateStats(records) {
+  const today = getTodayISO();
+  const total = (records||[]).reduce((s,r) => s+(parseFloat(r.fees)||0), 0);
+  const todayCnt = (records||[]).filter(r => r.date===today).length;
+  const now   = new Date();
+  const label = now.toLocaleString('en-IN',{month:'long',year:'numeric'});
+  document.getElementById('statPatients').textContent = (records||[]).length;
+  document.getElementById('statFees').textContent     = '₹'+total.toLocaleString('en-IN',{minimumFractionDigits:2});
+  document.getElementById('statToday').textContent    = todayCnt;
+  document.getElementById('statMonth').textContent    = label;
+  document.getElementById('monthLabel').textContent   = label;
+}
+
+function updateMonthLabel() {
+  const now = new Date();
+  const label = now.toLocaleString('en-IN',{month:'long',year:'numeric'});
+  document.getElementById('monthLabel').textContent = label;
+  document.getElementById('statMonth').textContent  = label;
+}
+
+// ══════════ SYNC INDICATOR ══════════
+function updateSyncIndicator() {
+  const dot=document.getElementById('syncDot'), lbl=document.getElementById('syncLabel');
+  dot.className='sync-dot active';
+  lbl.textContent = STATE.config.dept||STATE.config.hospital||'Local Storage';
+}
+function setSyncLoading(){ document.getElementById('syncDot').className='sync-dot loading'; document.getElementById('syncLabel').textContent='Testing…'; }
+function setSyncActive() { document.getElementById('syncDot').className='sync-dot active';  document.getElementById('syncLabel').textContent=STATE.config.dept||STATE.config.hospital||'Local Storage'; }
+function setSyncError()  { document.getElementById('syncDot').className='sync-dot error';   document.getElementById('syncLabel').textContent='Sheet Error'; }
+
+// ══════════ UTILS ══════════
+function setTodayDates() {
+  document.getElementById('receiptDate').value = getTodayISO();
+}
+function getTodayISO() {
+  // Returns today's date in YYYY-MM-DD in IST (UTC+5:30)
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5*60+30)*60*1000);
+  const y = ist.getUTCFullYear();
+  const m = String(ist.getUTCMonth()+1).padStart(2,'0');
+  const d = String(ist.getUTCDate()).padStart(2,'0');
+  return y+'-'+m+'-'+d;
+}
+function getCurrentYearMonth() {
+  // Returns current YYYY-MM in IST
+  return getISTYearMonth();
+}
+function escHtml(s)           { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showStatus(id,msg,type){ const el=document.getElementById(id); el.textContent=msg; el.className='status show '+type; }
+function hideStatus(id)       { document.getElementById(id).className='status'; }
+</script>
+</body>
+</html>
